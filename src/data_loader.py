@@ -24,15 +24,23 @@ class LocalCSVLoader:
         # 1. Construct the target absolute or relative file path
         file_path = os.path.join(self.data_dir, f"{ticker}.csv")
         
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Execution Error: Raw data file not found at {file_path}")
+        # Convert to absolute path to make debugging missing files much easier
+        abs_file_path = os.path.abspath(file_path)
+        if not os.path.exists(abs_file_path):
+            raise FileNotFoundError(f"Execution Error: Raw data file not found at {abs_file_path}")
         
         # 2. Ingest the data file using Pandas
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(abs_file_path)
         
         # 3. Standardize column headers to lowercase to prevent casing errors 
         # (e.g., handling 'Adj Close' vs 'adj close' vs 'Close' bugs)
         df.columns = [col.lower().strip() for col in df.columns]
+
+        # Safely rename variations like 'close/last' to exactly 'close'
+        for col in df.columns:
+            if 'close' in col and col != 'adj close':
+                df.rename(columns={col: 'close'}, inplace=True)
+                break
         
         # Ensure critical core columns exist in the raw dataset
         required_columns = ['date', 'open', 'high', 'low', 'close', 'volume']
@@ -61,8 +69,8 @@ class LocalCSVLoader:
         float_cols = ['open', 'high', 'low', 'close']
         if 'adj close' in df.columns:
             float_cols.append('adj close')
-            
-        df[float_cols] = df[float_cols].astype(np.float64)
+
+        df[float_cols] = df[float_cols].replace(r'[\$,]', '', regex=True).astype(np.float64)
         df['volume'] = df['volume'].astype(np.int64)
         
         return df

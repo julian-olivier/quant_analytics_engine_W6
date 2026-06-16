@@ -32,16 +32,16 @@ def calc_annualized_return(df: pd.DataFrame, price_col: str = 'close', trading_d
 
 
 # Risk Metrics
-
-# def calculate_annualized_volatility(df: pd.DataFrame, price_col: str = 'close', trading_days: int = 252, crypto: bool = False) -> float:
-#     """
-#     Calculates annualized volatility (Vol).
-#     Formula: Vol = StdDev(R) * sqrt(trading_days)
-#     """
-#     if crypto: 
-#         trading_days = 365  # Adjust for crypto markets
+def calculate_annualized_volatility(df: pd.DataFrame, price_col: str = 'close', trading_days: int = 252, crypto: bool = False) -> float:
+    """
+    Calculates annualized volatility (Vol).
+    Formula: Vol = StdDev(R) * sqrt(trading_days)
+    """
+    if crypto: 
+        trading_days = 365  # Adjust for crypto markets
     
-#     period_returns = df[price_col]/.
+    period_returns = np.log( df[price_col] / df[price_col].shift(1) )
+    return period_returns.std() * np.sqrt(trading_days)
 
 
 # Tail-Risk & Loss Metrics
