@@ -59,6 +59,17 @@ def calculate_sharpe_ratio(df: pd.DataFrame, risk_free_rate: float, price_col: s
 
 # Tail-Risk & Loss Metrics
 
+def calculate_max_drawdown(df: pd.DataFrame, price_col: str = 'close') -> float:
+    """
+    Calculates the Maximum Drawdown (MDD).
+    Formula: MDD = (Peak - Trough) / Peak
+    """
+    df['cumulative_max'] = df[price_col].cummax()
+    df['drawdown'] = (df[price_col] - df['cumulative_max']) / df['cumulative_max']
+    max_drawdown = df['drawdown'].min()
+    df.drop(columns=['cumulative_max', 'drawdown'], inplace=True)  # Clean up temporary columns
+    return max_drawdown
+
 def calc_SMA(df: pd.DataFrame, window: int = 50, col: str = 'close') -> pd.DataFrame:
     """
     Calculates the Simple Moving Average (SMA) for a given window size.
