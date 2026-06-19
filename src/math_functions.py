@@ -32,17 +32,30 @@ def calc_annualized_return(df: pd.DataFrame, price_col: str = 'close', trading_d
 
 
 # Risk Metrics
-
-# def calculate_annualized_volatility(df: pd.DataFrame, price_col: str = 'close', trading_days: int = 252, crypto: bool = False) -> float:
-#     """
-#     Calculates annualized volatility (Vol).
-#     Formula: Vol = StdDev(R) * sqrt(trading_days)
-#     """
-#     if crypto: 
-#         trading_days = 365  # Adjust for crypto markets
+def calculate_annualized_volatility(df: pd.DataFrame, price_col: str = 'close', trading_days: int = 252, crypto: bool = False) -> float:
+    """
+    Calculates annualized volatility (Vol).
+    Formula: Vol = StdDev(R) * sqrt(trading_days)
+    """
+    if crypto: 
+        trading_days = 365  # Adjust for crypto markets
     
-#     period_returns = df[price_col]/.
+    period_returns = np.log( df[price_col] / df[price_col].shift(1) )
+    return period_returns.std() * np.sqrt(trading_days)
 
+
+def calculate_sharpe_ratio(df: pd.DataFrame, risk_free_rate: float, price_col: str = 'close', trading_days: int = 252) -> float:
+    """
+    Calculates the Sharpe Ratio (SR).
+    Formula: SR = (Mean(R) - Rf) / StdDev(R) 
+    """
+
+    calc_daily_returns(df, price_col)
+    excess_returns = (df['daily_return'] - risk_free_rate )
+    avg_excess_returns = excess_returns.mean()
+    std_excess_returns = excess_returns.std()
+
+    return (avg_excess_returns / std_excess_returns) * np.sqrt(trading_days)
 
 # Tail-Risk & Loss Metrics
 
