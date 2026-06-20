@@ -54,6 +54,7 @@ def calculate_sharpe_ratio(df: pd.DataFrame, risk_free_rate: float, price_col: s
     excess_returns = (df['daily_return'] - risk_free_rate )
     avg_excess_returns = excess_returns.mean()
     std_excess_returns = excess_returns.std()
+    df.drop(columns=['daily_return'], inplace=True)  # Clean up temporary column
 
     return (avg_excess_returns / std_excess_returns) * np.sqrt(trading_days)
 
@@ -68,7 +69,23 @@ def calculate_max_drawdown(df: pd.DataFrame, price_col: str = 'close') -> float:
     df['drawdown'] = (df[price_col] - df['cumulative_max']) / df['cumulative_max']
     max_drawdown = df['drawdown'].min()
     df.drop(columns=['cumulative_max', 'drawdown'], inplace=True)  # Clean up temporary columns
-    return max_drawdown
+    return max_drawdown  
+
+def calculate_sortino_ratio(df: pd.DataFrame, risk_free_rate: float, price_col: str = 'close') -> float:
+    """
+    Calculates the Sortino Ratio (SR).
+    Formula: SR = (Mean(R) - Rf) / DownsideDeviation(R)
+    """
+    calc_daily_returns(df, price_col)
+    avg_returns = df['daily_return'].mean()
+    df['downside_returns'] = df['daily_return'].where(df['daily_return'] < risk_free_rate)
+    std_downside = df['downside_returns'].std()
+
+    df.drop(columns=['daily_return', 'downside_returns'], inplace=True)  # Clean up temporary columns
+    
+    return (avg_returns - risk_free_rate) / std_downside 
+
+
 
 def calc_SMA(df: pd.DataFrame, window: int = 50, col: str = 'close') -> pd.DataFrame:
     """
