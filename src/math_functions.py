@@ -85,7 +85,7 @@ def calculate_sortino_ratio(df: pd.DataFrame, risk_free_rate: float, price_col: 
     
     return (avg_returns - risk_free_rate) / std_downside 
 
-
+def calc_value_at_risk(df: pd.DataFrame, confidence_level: float = 0.95, price_col: str = 'close')
 
 def calc_SMA(df: pd.DataFrame, window: int = 50, col: str = 'close') -> pd.DataFrame:
     """
